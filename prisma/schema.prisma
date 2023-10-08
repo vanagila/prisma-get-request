@@ -1,0 +1,72 @@
+//configuração do gerador Prisma client
+generator client {
+  //especifica o tipo de clente a ser gerado(js)
+  provider = "prisma-client-js"
+}
+
+//configuração da fonte de dados (conexao com o banco de dados)
+datasource db {
+  //especifica o tipo de banco de dados usado
+  provider = "postgresql"
+  //obtem a url do banco
+  url = env("DATABASE_URL")
+}
+
+model Criminals {
+  id String @db.Uuid @id @default(uuid())
+  name String @db.VarChar(100)
+  birthDate DateTime @db.Date @map("birth_date")
+  cpf String? @db.VarChar(11) @unique
+  gender String @db.VarChar(100)
+  rg String? @db.VarChar(13) @unique
+  cnh String? @db.VarChar(20) @unique
+  description String? @db.VarChar(255)
+  address String? @db.VarChar(255)
+  createdAt DateTime @db.Timestamp() @default(now()) @map("created_at")
+  updateAt DateTime @db.Timestamp() @updatedAt @map("updated_at")
+
+  crimes Crimes[]
+  
+  @@map("criminals")
+}
+
+//NULL - NAO OBRIGATORIO
+
+model Weapons {
+  id String @db.Uuid @id @default(uuid())
+  type Int? @db.Integer
+  caliber Float? @db.DoublePrecision
+  name String @db.VarChar(100)
+  serialNumber String? @db.VarChar(155) @map("serial_number")
+  length Float? @db.DoublePrecision
+  weigth Float? @db.DoublePrecision
+  description String? @db.VarChar(255)
+  createdAt DateTime @db.Timestamp() @default(now()) @map("created_at")
+  updateAt DateTime @db.Timestamp() @updatedAt @map("updated_at")
+
+  crimes Crimes?
+
+  @@map("weapons")
+}
+
+model Crimes {
+  id String @db.Uuid @id @default(uuid())
+  description String @db.VarChar(255)
+  crimeDate DateTime @db.Timestamp() @map("crime_date")
+  article String @db.VarChar(100)
+  severity Int @db.Integer
+  victims String @db.VarChar(255)
+  address String? @db.VarChar(255)
+  createdAt DateTime @db.Timestamp() @default(now()) @map("created_at")
+  updateAt DateTime @db.Timestamp() @updatedAt @map("updated_at")
+
+  criminalId String @db.Uuid @map("criminal_id")
+  criminals Criminals @relation(fields: [criminalId], references: [id])
+  
+  weaponId String @db.Uuid @unique @map("weapon_id")
+  weapon Weapons @relation(fields: [weaponId], references: [id])
+  
+
+  @@map("crimes")
+}
+
